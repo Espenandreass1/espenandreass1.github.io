@@ -104,22 +104,39 @@
     const resultText = document.getElementById('resultText');
     const spinButton = document.getElementById('spinButton');
 
-    spinButton.onclick = function() {
-        // Base rotations to ensure the wheel spins multiple times
-        let baseRotation = 360 * (5 + Math.floor(Math.random() * 3)); // Ensures the wheel spins at least 5 full rotations and up to 7
-        let randomSpin = Math.floor(Math.random() * 360); // Generates a random angle between 0 and 359 degrees for the final stop
-        let totalRotation = baseRotation + randomSpin; // Total rotation includes guaranteed spins plus random final angle
-        wheel.style.transform = `rotate(${totalRotation}deg)`;
+    // Function to handle spinning of the wheel
+    function spinWheel() {
+        // Remove any previous transition to reset the wheel state
+        wheel.style.transition = 'none';
+        // Normalize the wheel's rotation so it starts fresh and avoids rotation limits
+        const currentRotation = parseInt(wheel.style.transform.replace(/[^0-9.]/g, '')) || 0;
+        wheel.style.transform = `rotate(${currentRotation % 360}deg)`;
 
+        // Timeout to allow CSS property to take effect
         setTimeout(() => {
-            const effectiveDegrees = totalRotation % 360; // Normalize the rotation within 0-359 degrees
-            const segmentAngle = 360 / participants.length; // Each segment's angle
-            const index = Math.floor((360 - effectiveDegrees) / segmentAngle) % participants.length; // Calculate the index based on rotation
-            const chosenOne = participants[index]; // Select the participant based on where the wheel stops
-            resultText.innerText = `${chosenOne} has to pay the bill!`;
-        }, 3000); // Duration to match the CSS animation
-    };
+            // Apply the spinning effect
+            wheel.style.transition = 'transform 3s ease-out';
+            // Calculate total rotation
+            const baseRotation = 360 * (5 + Math.floor(Math.random() * 3)); // Ensures at least 5 full rotations
+            const randomSpin = Math.floor(Math.random() * 360);
+            const totalRotation = baseRotation + randomSpin;
+            wheel.style.transform = `rotate(${totalRotation + currentRotation % 360}deg)`;
+
+            // Determine the result after the animation completes
+            setTimeout(() => {
+                const effectiveDegrees = (totalRotation + currentRotation) % 360; // Normalize degrees
+                const segmentAngle = 360 / participants.length; // Angle per segment
+                const index = Math.floor((360 - effectiveDegrees) / segmentAngle) % participants.length;
+                const chosenOne = participants[index];
+                resultText.innerText = `${chosenOne} has to pay the bill!`;
+            }, 3000); // Match the CSS animation duration
+        }, 10); // Short delay to ensure the style reset takes effect
+    }
+
+    // Event listener for the button
+    spinButton.onclick = spinWheel;
 </script>
+
 
 
 </body>

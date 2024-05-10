@@ -98,24 +98,27 @@
     <button id="spinButton">Spin the Wheel!</button>
     <h2 id="resultText"></h2>
 
-    <script>
-        const participants = ['Espen', 'Viliyana', 'Joachim', 'Øystein', 'Farooq', 'Marte'];
-        const wheel = document.getElementById('wheel');
-        const resultText = document.getElementById('resultText');
-        const spinButton = document.getElementById('spinButton');
+<script>
+    const participants = ['Espen', 'Viliyana', 'Joachim', 'Øystein', 'Farooq', 'Marte'];
+    const wheel = document.getElementById('wheel');
+    const resultText = document.getElementById('resultText');
+    const spinButton = document.getElementById('spinButton');
 
-        spinButton.onclick = function() {
-            let previousDegrees = parseInt(wheel.style.transform.replace(/[^0-9.]/g, '')) || 0;
-            let spinDegrees = previousDegrees + (360 * 5) + 60 * Math.floor(Math.random() * 6); // spin a random number of full segments plus extra turns
-            wheel.style.transform = `rotate(${spinDegrees}deg)`;
+    spinButton.onclick = function() {
+        let baseRotation = 360 * 5; // Ensures the wheel spins at least 5 full rotations for effect
+        let randomSpin = Math.random() * 360; // Generates a random angle between 0 and 359 degrees
+        let totalRotation = baseRotation + randomSpin; // Total rotation includes guaranteed spins plus random spin
+        wheel.style.transform = `rotate(${totalRotation}deg)`;
 
-            setTimeout(() => {
-                const effectiveDegrees = spinDegrees % 360; // actual degrees modulo 360
-                const index = Math.floor(effectiveDegrees / 60);
-                const chosenOne = participants[(6 - index) % 6]; // adjust index based on wheel's graphical layout
-                resultText.innerText = `${chosenOne} has to pay the bill!`;
-            }, 3000); // Match the duration of the spin
-        };
-    </script>
+        setTimeout(() => {
+            const effectiveDegrees = totalRotation % 360; // Normalize the rotation within 0-359 degrees
+            const segmentAngle = 360 / participants.length; // Each segment's angle
+            const index = Math.floor((360 - effectiveDegrees) / segmentAngle) % participants.length; // Calculate the index based on rotation
+            const chosenOne = participants[index]; // Select the participant based on where the wheel stops
+            resultText.innerText = `${chosenOne} has to pay the bill!`;
+        }, 3000); // Duration to match the CSS animation
+    };
+</script>
+
 </body>
 </html>

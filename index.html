@@ -106,12 +106,13 @@
 
         spinButton.onclick = function() {
             let previousDegrees = parseInt(wheel.style.transform.replace(/[^0-9.]/g, '')) || 0;
-            let spinDegrees = previousDegrees + (360 * 5) + (60 * (Math.floor(Math.random() * 6) + 0.5)); // Centering the names by adding 0.5
+            let spinDegrees = previousDegrees + (360 * 5) + 60 * Math.floor(Math.random() * 6); // spin a random number of full segments plus extra turns
             wheel.style.transform = `rotate(${spinDegrees}deg)`;
 
             setTimeout(() => {
-                const index = Math.floor((spinDegrees / 60) % 6);
-                const chosenOne = participants[index];
+                const effectiveDegrees = spinDegrees % 360; // actual degrees modulo 360
+                const index = Math.floor(effectiveDegrees / 60);
+                const chosenOne = participants[(6 - index) % 6]; // adjust index based on wheel's graphical layout
                 resultText.innerText = `${chosenOne} has to pay the bill!`;
             }, 3000); // Match the duration of the spin
         };

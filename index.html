@@ -80,64 +80,98 @@
         text-align: center;
         --rotate: 0deg;
     }
+    #inputForm {
+        margin-bottom: 20px;
+    }
+    #inputForm input {
+        margin-right: 10px;
+    }
 </style>
 </head>
 <body>
     <h1>Spin the Wheel to Choose Who Pays the Bill!</h1>
+
+    <!-- Form to input names -->
+    <div id="inputForm">
+        <input type="text" id="nameInput" placeholder="Enter name" />
+        <button id="addButton">Add Name</button>
+    </div>
+
     <div id="wheelContainer">
-        <div id="wheel">
-            <div class="segment" style="--rotate: 15deg;">Espen</div>
-            <div class="segment" style="--rotate: 75deg;">Viliyana</div>
-            <div class="segment" style="--rotate: 135deg;">Joachim</div>
-            <div class="segment" style="--rotate: 195deg;">Øystein</div>
-            <div class="segment" style="--rotate: 255deg;">Farooq</div>
-            <div class="segment" style="--rotate: 315deg;">Marte</div>
-        </div>
+        <div id="wheel"></div>
         <div id="indicator"></div>
     </div>
     <button id="spinButton">Spin the Wheel!</button>
     <h2 id="resultText"></h2>
 
 <script>
-    const participants = ['Espen', 'Viliyana', 'Joachim', 'Øystein', 'Farooq', 'Marte'];
+    let participants = [];
     const wheel = document.getElementById('wheel');
     const resultText = document.getElementById('resultText');
     const spinButton = document.getElementById('spinButton');
+    const nameInput = document.getElementById('nameInput');
+    const addButton = document.getElementById('addButton');
+
+    // Function to add a name to the participants list and update the wheel
+    function addName() {
+        const name = nameInput.value.trim();
+        if (name !== "" && !participants.includes(name)) {
+            participants.push(name);
+            updateWheel();
+            nameInput.value = ''; // Clear input field
+        }
+    }
+
+    // Function to update the wheel based on participants
+    function updateWheel() {
+        wheel.innerHTML = '';
+        const segmentAngle = 360 / participants.length;
+        participants.forEach((name, index) => {
+            const segment = document.createElement('div');
+            segment.className = 'segment';
+            segment.style.setProperty('--rotate', `${index * segmentAngle}deg`);
+            segment.style.setProperty('background-color', `hsl(${index * (360 / participants.length)}, 100%, 75%)`);
+            segment.textContent = name;
+            wheel.appendChild(segment);
+        });
+    }
 
     // Function to handle spinning of the wheel
     function spinWheel() {
-        // Remove any previous transition to reset the wheel state
+        if (participants.length === 0) {
+            resultText.innerText = "Please add at least one participant!";
+            return;
+        }
+
         wheel.style.transition = 'none';
-        // Normalize the wheel's rotation so it starts fresh and avoids rotation limits
         const currentRotation = parseInt(wheel.style.transform.replace(/[^0-9.]/g, '')) || 0;
         wheel.style.transform = `rotate(${currentRotation % 360}deg)`;
 
-        // Timeout to allow CSS property to take effect
         setTimeout(() => {
-            // Apply the spinning effect
             wheel.style.transition = 'transform 3s ease-out';
-            // Calculate total rotation
-            const baseRotation = 360 * (5 + Math.floor(Math.random() * 3)); // Ensures at least 5 full rotations
+            const baseRotation = 360 * (5 + Math.floor(Math.random() * 3));
             const randomSpin = Math.floor(Math.random() * 360);
             const totalRotation = baseRotation + randomSpin;
             wheel.style.transform = `rotate(${totalRotation + currentRotation % 360}deg)`;
 
-            // Determine the result after the animation completes
             setTimeout(() => {
-                const effectiveDegrees = (totalRotation + currentRotation) % 360; // Normalize degrees
-                const segmentAngle = 360 / participants.length; // Angle per segment
+                const effectiveDegrees = (totalRotation + currentRotation) % 360;
+                const segmentAngle = 360 / participants.length;
                 const index = Math.floor((360 - effectiveDegrees) / segmentAngle) % participants.length;
                 const chosenOne = participants[index];
                 resultText.innerText = `${chosenOne} has to pay the bill!`;
-            }, 3000); // Match the CSS animation duration
-        }, 10); // Short delay to ensure the style reset takes effect
+            }, 3000);
+        }, 10);
     }
 
-    // Event listener for the button
+    // Event listeners
+    addButton.onclick = addName;
+    nameInput.addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            addName();
+        }
+    });
     spinButton.onclick = spinWheel;
 </script>
-
-
-
 </body>
 </html>
